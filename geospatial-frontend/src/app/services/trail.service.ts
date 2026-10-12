@@ -3,6 +3,14 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface UpdateTrailPayload {
+  name: string;
+  location: string;
+  duration: number;
+  difficulty: string;
+  description: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -69,4 +77,18 @@ export class TrailService {
         { responseType: 'blob' }
     );
     }
+
+    updateTrail(id: number, data: UpdateTrailPayload) {
+  const token = localStorage.getItem('token');
+
+  return this.http.put<{ message: string }>(
+    this.apiUrl + `updateTrail/${id}`,
+    data,
+    {
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {}
+    }
+  );
+}
 }

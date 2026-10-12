@@ -48,6 +48,15 @@
         </button>
 
         <button
+        *ngIf="userService.getRole() === 'ROLE_ADMIN'"
+        pButton
+        label="Edit Trail"
+        icon="pi pi-pencil"
+        class="p-button-warning"
+        (click)="openEditDialog()">
+      </button>
+
+        <button
           *ngIf="userService.getRole() === 'ROLE_ADMIN' || userService.getUser() === trail.email"
           pButton
           label="Delete"
@@ -149,22 +158,125 @@
   </ng-template>
 
 </p-carousel>
-<p-galleria
-  [value]="images"
+<p-dialog
+  header="Trail Photos"
   [(visible)]="galleryVisible"
-  [(activeIndex)]="galleryIndex"
-  [fullScreen]="true"
-  [showItemNavigators]="true"
-  [showThumbnails]="false"
-  [circular]="true"
-  [containerStyle]="{ 'max-width': '90vw' }">
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{ width: '95vw', maxWidth: '1100px' }"
+  [contentStyle]="{ padding: '10px' }"
+  appendTo="body">
 
-  <ng-template pTemplate="item" let-img>
+  <div class="lightbox-content" *ngIf="images.length > 0">
+
+    <button
+      type="button"
+      pButton
+      icon="pi pi-chevron-left"
+      class="lightbox-arrow"
+      [disabled]="images.length <= 1"
+      (click)="previousImage()">
+    </button>
 
     <img
-      [src]="img.imageURL"
-      class="fullscreen-img">
+      [src]="images[galleryIndex].imageURL"
+      class="lightbox-img">
 
-  </ng-template>
+    <button
+      type="button"
+      pButton
+      icon="pi pi-chevron-right"
+      class="lightbox-arrow"
+      [disabled]="images.length <= 1"
+      (click)="nextImage()">
+    </button>
 
-</p-galleria>
+  </div>
+
+  <div class="lightbox-counter" *ngIf="images.length > 0">
+    {{ galleryIndex + 1 }} / {{ images.length }}
+  </div>
+
+</p-dialog>
+
+<p-dialog
+  header="Edit Trail"
+  [(visible)]="editVisible"
+  [modal]="true"
+  [style]="{ width: '32rem', maxWidth: '95vw' }">
+
+  <form
+    #editForm="ngForm"
+    (ngSubmit)="saveTrail()"
+    class="edit-trail-form">
+
+    <label for="editName">Trail Name</label>
+    <input
+      id="editName"
+      name="name"
+      type="text"
+      required
+      [(ngModel)]="editData.name">
+
+    <label for="editLocation">Location</label>
+    <input
+      id="editLocation"
+      name="location"
+      type="text"
+      required
+      [(ngModel)]="editData.location">
+
+    <label for="editDuration">Duration (hours)</label>
+    <input
+      id="editDuration"
+      name="duration"
+      type="number"
+      min="0.01"
+      step="0.1"
+      required
+      [(ngModel)]="editData.duration">
+
+    <label for="editDifficulty">Difficulty</label>
+    <select
+      id="editDifficulty"
+      name="difficulty"
+      [(ngModel)]="editData.difficulty">
+      <option value="Easy">Easy</option>
+      <option value="Mid">Mid</option>
+      <option value="Hard">Hard</option>
+    </select>
+
+    <label for="editDescription">Description</label>
+    <textarea
+      id="editDescription"
+      name="description"
+      rows="4"
+      maxlength="2000"
+      [(ngModel)]="editData.description">
+    </textarea>
+
+    <p *ngIf="editError" class="edit-error">
+      {{ editError }}
+    </p>
+
+    <div class="edit-trail-actions">
+      <button
+        type="button"
+        pButton
+        label="Cancel"
+        class="p-button-secondary"
+        [disabled]="savingEdit"
+        (click)="editVisible = false">
+      </button>
+
+      <button
+        type="submit"
+        pButton
+        label="Save Changes"
+        icon="pi pi-check"
+        [disabled]="editForm.invalid || savingEdit">
+      </button>
+    </div>
+
+  </form>
+</p-dialog>

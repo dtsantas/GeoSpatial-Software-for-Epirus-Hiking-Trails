@@ -14,6 +14,9 @@ import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TrailMapComponent } from '../trail-map-editor/trail-map-editor';
 import { GalleriaModule } from 'primeng/galleria';
+import { FormsModule } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
+import { UpdateTrailPayload } from '../services/trail.service';
 
 
 
@@ -22,7 +25,8 @@ import { GalleriaModule } from 'primeng/galleria';
   standalone: true,
   imports: [CommonModule,CarouselModule, ConfirmDialogModule, 
     ProgressSpinnerModule, FileUploadModule, RouterModule, CommonModule, 
-    RouterModule, DataViewModule, ButtonModule, CardModule, TrailMapComponent, GalleriaModule],
+    RouterModule, DataViewModule, ButtonModule, CardModule, TrailMapComponent, GalleriaModule,
+    FormsModule, DialogModule],
     providers: [ConfirmationService],
   templateUrl: './trail.html',
   styleUrl: './trail.css',
@@ -157,6 +161,79 @@ openGallery(img: { imageURL: string }) {
 
   this.galleryIndex = index >= 0 ? index : 0;
   this.galleryVisible = true;
+}
+
+nextImage() {
+  if (this.images.length > 1) {
+    this.galleryIndex =
+      (this.galleryIndex + 1) % this.images.length;
+  }
+}
+
+previousImage() {
+  if (this.images.length > 1) {
+    this.galleryIndex =
+      (this.galleryIndex - 1 + this.images.length)
+      % this.images.length;
+  }
+}
+
+editVisible = false;
+savingEdit = false;
+editError = '';
+
+editData: UpdateTrailPayload = {
+  name: '',
+  location: '',
+  duration: 0,
+  difficulty: 'Easy',
+  description: ''
+};
+
+openEditDialog() {
+  if (this.userService.getRole() !== 'ROLE_ADMIN') {
+    return;
+  }
+
+  this.editData = {
+    name: this.trail.trailName,
+    location: this.trail.location,
+    duration: Number(this.trail.duration),
+    difficulty: this.trail.difficulty,
+    description: this.trail.description ?? ''
+  };
+
+  this.editError = '';
+  this.editVisible = true;
+}
+
+saveTrail() {
+  if (
+    this.userService.getRole() !== 'ROLE_ADMIN' ||
+    !this.trail.id ||
+    this.savingEdit
+  ) {
+    return;
+  }
+
+  this.savingEdit = true;
+  this.editError = '';
+
+  this.trailService.updateTrail(
+    this.trail.id,
+    this.editData
+  ).subscribe({
+    next: () => {
+      this.savingEdit = false;
+      this.editVisible = false;
+      this.getTrail(this.trailId);
+    },
+    error: (err) => {
+      console.error('Update failed', err);
+      this.editError = 'Failed to update trail.';
+      this.savingEdit = false;
+    }
+  });
 }
 
 }

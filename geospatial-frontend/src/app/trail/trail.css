@@ -215,3 +215,65 @@ app-trail-map {
 .carousel-img {
   cursor: zoom-in;
 }
+
+.edit-trail-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-trail-form label {
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.edit-trail-form input,
+.edit-trail-form select,
+.edit-trail-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.edit-trail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.edit-error {
+  color: #c62828;
+}
+.lightbox-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 300px;
+}
+
+.lightbox-img {
+  display: block;
+  width: auto;
+  max-width: calc(100% - 110px);
+  max-height: 75vh;
+  object-fit: contain;
+  margin: auto;
+}
+
+.lightbox-arrow {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.lightbox-counter {
+  text-align: center;
+  margin-top: 12px;
+  font-weight: 600;
+}

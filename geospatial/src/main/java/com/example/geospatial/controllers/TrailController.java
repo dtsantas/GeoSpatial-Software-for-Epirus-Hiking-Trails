@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,8 +25,11 @@ import com.example.geospatial.DTO.TrailDTO;
 import com.example.geospatial.models.CustomUserDetails;
 import com.example.geospatial.models.Trail;
 import com.example.geospatial.models.User;
+import com.example.geospatial.requests.UpdateTrailRequest;
 import com.example.geospatial.services.SupabaseStorageService;
 import com.example.geospatial.services.TrailService;
+
+import jakarta.validation.Valid;
 
 @RestController
 public class TrailController {
@@ -111,15 +115,20 @@ public ResponseEntity<?> createTrail(
     }
 }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")    
-    @PutMapping("/updateTrail")
-    public ResponseEntity<?> updateTrail(@Validated @RequestBody Trail trail){
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/updateTrail/{id}")
+    public ResponseEntity<?> updateTrail(
+            @PathVariable long id,
+            @Valid @RequestBody UpdateTrailRequest request) {
+
         try {
-            return ResponseEntity.ok(trailServiceImpl.updateTrail(trail));
+            return trailServiceImpl.updateTrailDetails(id, request);
+
         } catch (Exception e) {
-            logger.error("Error updating trail id: {}", trail.getId(), e);
-            return ResponseEntity.internalServerError().body(Map.of("error", "Unable to update trail."));
-        } 
+            return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of("error", "Unable to update trail."));
+}
     }
     
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")

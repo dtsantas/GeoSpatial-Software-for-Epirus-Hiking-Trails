@@ -24,6 +24,7 @@ import com.example.geospatial.DTO.TrailDTO;
 import com.example.geospatial.models.CustomUserDetails;
 import com.example.geospatial.models.Trail;
 import com.example.geospatial.models.User;
+import com.example.geospatial.requests.UpdateTrailRequest;
 import com.example.geospatial.services.TrailService;
 import com.example.geospatial.services.SupabaseStorageService;
 
@@ -220,21 +221,55 @@ void createTrail_shouldMapFieldsCorrectly() throws Exception {
 
     @Test
     void updateTrail_shouldReturnOk_whenServiceSucceeds() {
-        doReturn(ResponseEntity.ok("Updated")).when(trailServiceImpl).updateTrail(testTrail);
 
-        ResponseEntity<?> response = trailController.updateTrail(testTrail);
+        long trailId = 1L;
+
+        UpdateTrailRequest request = new UpdateTrailRequest(
+            "Updated Trail",
+            "Epirus",
+            3.5,
+            "Easy",
+            "Updated description"
+        );
+
+        doReturn(ResponseEntity.ok("Updated"))
+            .when(trailServiceImpl)
+            .updateTrailDetails(trailId, request);
+
+        ResponseEntity<?> response =
+            trailController.updateTrail(trailId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(trailServiceImpl, times(1)).updateTrail(testTrail);
+
+        verify(trailServiceImpl, times(1))
+            .updateTrailDetails(trailId, request);
     }
 
     @Test
     void updateTrail_shouldReturn500_whenServiceThrows() {
-        when(trailServiceImpl.updateTrail(testTrail)).thenThrow(new RuntimeException("DB error"));
 
-        ResponseEntity<?> response = trailController.updateTrail(testTrail);
+        long trailId = 1L;
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        UpdateTrailRequest request = new UpdateTrailRequest(
+            "Updated Trail",
+            "Epirus",
+            3.5,
+            "Easy",
+            "Updated description"
+        );
+
+        doThrow(new RuntimeException("DB error"))
+            .when(trailServiceImpl)
+            .updateTrailDetails(trailId, request);
+
+        ResponseEntity<?> response =
+            trailController.updateTrail(trailId, request);
+
+        assertEquals(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            response.getStatusCode()
+        );
+
         assertErrorMessage(response, "Unable to update trail.");
     }
 

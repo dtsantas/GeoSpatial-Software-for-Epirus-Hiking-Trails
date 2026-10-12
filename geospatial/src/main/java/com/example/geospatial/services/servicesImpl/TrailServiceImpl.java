@@ -1,6 +1,7 @@
 package com.example.geospatial.services.servicesImpl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import com.example.geospatial.DTO.TrailDTO;
 import com.example.geospatial.models.Trail;
 import com.example.geospatial.models.User;
 import com.example.geospatial.repositories.TrailRepository;
+import com.example.geospatial.requests.UpdateTrailRequest;
 import com.example.geospatial.services.TrailService;
 
 @Service
@@ -127,5 +129,36 @@ public class TrailServiceImpl implements TrailService{
         
         return ResponseEntity.ok("Deleted!");
     }
+
+    @Override
+public ResponseEntity<?> updateTrailDetails(
+        long id,
+        UpdateTrailRequest request) {
+
+    Optional<Trail> optionalTrail = trailRepository.findById(id);
+
+    if (optionalTrail.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "Trail not found"));
+    }
+
+    Trail trail = optionalTrail.get();
+
+    trail.setName(request.name().trim());
+    trail.setLocation(request.location().trim());
+    trail.setDuration(request.duration());
+    trail.setDifficulty(request.difficulty());
+    trail.setDescription(
+        request.description() == null
+            ? ""
+            : request.description().trim()
+    );
+
+    trailRepository.save(trail);
+
+    return ResponseEntity.ok(
+        Map.of("message", "Trail updated successfully")
+    );
+}
 
 }
