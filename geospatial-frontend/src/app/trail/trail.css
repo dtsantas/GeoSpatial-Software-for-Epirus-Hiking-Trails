@@ -201,3 +201,17 @@ app-trail-map {
     width: 100%;
     height: 100%;
 }
+
+.fullscreen-img {
+  display: block;
+  max-width: 90vw;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  margin: auto;
+}
+
+.carousel-img {
+  cursor: zoom-in;
+}

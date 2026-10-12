@@ -13,6 +13,7 @@ import { CarouselModule } from 'primeng/carousel';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TrailMapComponent } from '../trail-map-editor/trail-map-editor';
+import { GalleriaModule } from 'primeng/galleria';
 
 
 
@@ -21,7 +22,7 @@ import { TrailMapComponent } from '../trail-map-editor/trail-map-editor';
   standalone: true,
   imports: [CommonModule,CarouselModule, ConfirmDialogModule, 
     ProgressSpinnerModule, FileUploadModule, RouterModule, CommonModule, 
-    RouterModule, DataViewModule, ButtonModule, CardModule, TrailMapComponent],
+    RouterModule, DataViewModule, ButtonModule, CardModule, TrailMapComponent, GalleriaModule],
     providers: [ConfirmationService],
   templateUrl: './trail.html',
   styleUrl: './trail.css',
@@ -144,6 +145,18 @@ getTrail(id: number) {
   }
   gpxFileUrl(trailId: number): any {
   this.trailService.getGpxFile;
+}
+
+galleryVisible = false;
+galleryIndex = 0;
+
+openGallery(img: { imageURL: string }) {
+  const index = this.images.findIndex(
+    image => image.imageURL === img.imageURL
+  );
+
+  this.galleryIndex = index >= 0 ? index : 0;
+  this.galleryVisible = true;
 }
 
 }

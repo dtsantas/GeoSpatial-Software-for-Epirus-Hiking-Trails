@@ -130,7 +130,9 @@
 
       <img
         [src]="img.imageURL"
-        class="carousel-img">
+        class="carousel-img"
+        (click)="openGallery(img)"
+        style="cursor: zoom-in;">
 
       <button
         *ngIf="userService.getRole() === 'ROLE_ADMIN'"
@@ -147,3 +149,22 @@
   </ng-template>
 
 </p-carousel>
+<p-galleria
+  [value]="images"
+  [(visible)]="galleryVisible"
+  [(activeIndex)]="galleryIndex"
+  [fullScreen]="true"
+  [showItemNavigators]="true"
+  [showThumbnails]="false"
+  [circular]="true"
+  [containerStyle]="{ 'max-width': '90vw' }">
+
+  <ng-template pTemplate="item" let-img>
+
+    <img
+      [src]="img.imageURL"
+      class="fullscreen-img">
+
+  </ng-template>
+
+</p-galleria>
