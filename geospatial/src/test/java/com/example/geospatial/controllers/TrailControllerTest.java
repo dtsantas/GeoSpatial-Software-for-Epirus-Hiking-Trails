@@ -18,12 +18,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.geospatial.DTO.TrailDTO;
 import com.example.geospatial.models.CustomUserDetails;
 import com.example.geospatial.models.Trail;
 import com.example.geospatial.models.User;
 import com.example.geospatial.services.TrailService;
+import com.example.geospatial.services.SupabaseStorageService;
+
 
 @ExtendWith(MockitoExtension.class)
 class TrailControllerTest {
@@ -33,6 +36,9 @@ class TrailControllerTest {
 
     @Mock
     private CustomUserDetails customUserDetails;
+
+    @Mock
+    private SupabaseStorageService supabaseStorageService;
 
     @InjectMocks
     private TrailController trailController;
@@ -147,6 +153,8 @@ void createTrail_shouldReturnOk_whenValidRequest() throws Exception {
     MockMultipartFile image = new MockMultipartFile(
             "image", "trail.jpg", "image/jpeg", "fake-image-bytes".getBytes()
     );
+    when(supabaseStorageService.uploadImage(any(MultipartFile.class)))
+        .thenReturn("https://example.com/trail.jpg");
     when(customUserDetails.getUser()).thenReturn(testUser);
     doReturn(ResponseEntity.ok("Trail created successfully"))
             .when(trailServiceImpl).createTrail(any(Trail.class));
@@ -166,6 +174,8 @@ void createTrail_shouldReturn500_whenServiceThrows() throws Exception {
     MockMultipartFile image = new MockMultipartFile(
             "image", "trail.jpg", "image/jpeg", "fake-image-bytes".getBytes()
     );
+    when(supabaseStorageService.uploadImage(any(MultipartFile.class)))
+        .thenReturn("https://example.com/trail.jpg");
     when(customUserDetails.getUser()).thenReturn(testUser);
     doThrow(new RuntimeException("Storage error"))
             .when(trailServiceImpl).createTrail(any(Trail.class));
@@ -184,6 +194,8 @@ void createTrail_shouldMapFieldsCorrectly() throws Exception {
     MockMultipartFile image = new MockMultipartFile(
             "image", "trail.jpg", "image/jpeg", "fake-image-bytes".getBytes()
     );
+    when(supabaseStorageService.uploadImage(any(MultipartFile.class)))
+        .thenReturn("https://example.com/trail.jpg");
     when(customUserDetails.getUser()).thenReturn(testUser);
     doReturn(ResponseEntity.ok("Trail created successfully"))
             .when(trailServiceImpl).createTrail(any(Trail.class));
@@ -200,7 +212,7 @@ void createTrail_shouldMapFieldsCorrectly() throws Exception {
             trail.getDuration().equals(3.0) &&
             trail.getDifficulty().equals("HARD") &&
             trail.getUser().equals(testUser) &&
-            trail.getImage().startsWith("uploads/")
+            "https://example.com/trail.jpg".equals(trail.getImage())
     ));
 }
 

@@ -1,6 +1,9 @@
 package com.example.geospatial.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
@@ -23,13 +26,8 @@ import com.example.geospatial.DTO.ImagesDTO;
 import com.example.geospatial.models.Trail;
 import com.example.geospatial.repositories.TrailRepository;
 import com.example.geospatial.services.ImageService;
+import com.example.geospatial.services.SupabaseStorageService;
 
-/**
- * Note: addImages() writes the uploaded file(s) to the local "uploads/"
- * directory as part of the controller method itself (see ImageController),
- * so — consistent with TrailControllerTest's createTrail tests — these
- * tests have a real (harmless) filesystem side effect when run.
- */
 @ExtendWith(MockitoExtension.class)
 class ImageControllerTest {
 
@@ -38,6 +36,9 @@ class ImageControllerTest {
 
     @Mock
     private ImageService imageServiceImpl;
+
+    @Mock
+    private SupabaseStorageService supabaseStorageService;
 
     @InjectMocks
     private ImageController imageController;
@@ -59,6 +60,8 @@ class ImageControllerTest {
         MockMultipartFile image = new MockMultipartFile(
                 "images", "photo1.jpg", "image/jpeg", "fake-bytes".getBytes());
         when(trailRepository.findById(1L)).thenReturn(Optional.of(testTrail));
+        when(supabaseStorageService.uploadImage(any(MultipartFile.class)))
+        .thenReturn("https://example.com/photo1.jpg");
 
         ResponseEntity<?> response = imageController.addImages(1L, List.of(image));
 
@@ -70,13 +73,33 @@ class ImageControllerTest {
     }
 
     @Test
-    void addImages_shouldThrow_whenTrailNotFound() {
-        when(trailRepository.findById(99L)).thenReturn(Optional.empty());
-        List<MultipartFile> images = List.of(
-                new MockMultipartFile("images", "p.jpg", "image/jpeg", "x".getBytes()));
+    void addImages_shouldReturn500_whenTrailNotFound() throws Exception {
 
-        assertThrows(RuntimeException.class, () -> imageController.addImages(99L, images));
-        verify(imageServiceImpl, never()).addImages(anyList(), any());
+        when(trailRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        List<MultipartFile> images = List.of(
+            new MockMultipartFile(
+                "images",
+                "p.jpg",
+                "image/jpeg",
+                "x".getBytes()
+            )
+        );
+
+        ResponseEntity<?> response =
+                imageController.addImages(99L, images);
+
+        assertEquals(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            response.getStatusCode()
+        );
+
+        verify(imageServiceImpl, never())
+                .addImages(anyList(), any());
+
+        verify(supabaseStorageService, never())
+                .uploadImage(any(MultipartFile.class));
     }
 
     @Test
